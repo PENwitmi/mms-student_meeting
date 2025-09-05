@@ -17,7 +17,8 @@ MMS Student Meeting System - A React/TypeScript/Firebase application for managin
 - ✅ File storage feature (PDF/images upload, list, delete) - **MERGED**
 - ✅ Firebase Storage integration (Blaze plan - Osaka region)
 - ✅ Firebase Storage instantiation in DataContext only
-- 🌐 **Deployed at**: GitHub Pages (public)
+- ✅ Production deployment fixed (.env.production file added)
+- 🌐 **Deployed at**: https://penwitmi.github.io/mms-student_meeting/
 
 ## Essential Commands
 
@@ -228,7 +229,8 @@ interface FileRecord {
 - 🔄 Set up budget alerts for Blaze plan
 
 ## Environment Variables
-All Firebase configuration in `.env.local`:
+### Development (.env.local)
+All Firebase configuration for local development:
 ```
 VITE_FIREBASE_API_KEY
 VITE_FIREBASE_AUTH_DOMAIN
@@ -237,6 +239,10 @@ VITE_FIREBASE_STORAGE_BUCKET
 VITE_FIREBASE_MESSAGING_SENDER_ID
 VITE_FIREBASE_APP_ID
 ```
+
+### Production (.env.production)
+Same Firebase configuration for production build (committed to repository).
+These are public client-side keys that are safe to commit.
 
 ## AuthContext Methods (Extended 2025-09-05)
 
@@ -280,7 +286,8 @@ interface AuthContextType {
 - ✅ Storage bucket configuration (.appspot.com)
 - ✅ Context API strict pattern enhancement
 - ✅ TypeScript build errors fixed
-- Latest commit: e2be76f (merged from develop)
+- ✅ Production deployment fix (.env.production added for GitHub Pages)
+- Latest commit: e705959 (production environment fix)
 
 ### Deployment Timeline
 - Morning: Context API refactoring, student features, interview redesign
