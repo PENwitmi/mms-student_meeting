@@ -91,11 +91,6 @@ export function StudentFileSection() {
                       }`}>
                         {student.name}
                       </p>
-                      {student.grade && (
-                        <p className="text-xs text-gray-500">
-                          {student.grade}年 {student.class}
-                        </p>
-                      )}
                     </div>
                     {selectedStudent?.id === student.id && (
                       <ChevronRight className="h-4 w-4 text-indigo-600" />

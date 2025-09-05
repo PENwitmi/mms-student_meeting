@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { FileText, Image, Trash2, ExternalLink, Upload } from 'lucide-react';
 import { useFilesData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatFileSize } from '@/lib/firebase/storage';
+import { formatFileSize } from '@/shared/utils/fileUtils';
 import type { FileRecord } from '@/contexts/types';
 import { FileUpload } from './FileUpload';
 

@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Upload, X, FileText, Image } from 'lucide-react';
 import { useFilesData } from '@/contexts/DataContext';
-import { formatFileSize } from '@/lib/firebase/storage';
+import { formatFileSize } from '@/shared/utils/fileUtils';
 
 interface FileUploadProps {
   studentId: string;

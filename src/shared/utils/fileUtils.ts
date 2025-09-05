@@ -1,12 +1,7 @@
 /**
- * Firebase Storage設定ファイル
- * ファイルのアップロード・ダウンロード機能を提供
+ * ファイル操作に関するユーティリティ関数
+ * Firebaseに依存しない純粋な関数のみを含む
  */
-
-import { getStorage } from 'firebase/storage';
-import { app } from './config';
-
-export const storage = getStorage(app);
 
 export const STORAGE_PATHS = {
   studentFiles: (studentId: string) => `students/${studentId}/files`,

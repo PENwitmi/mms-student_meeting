@@ -11,10 +11,10 @@ import { useStudents } from './hooks/realtime/useStudents';
 import { useFiles } from './hooks/realtime/useFiles';
 import { dev } from '@/shared/utils/devLogger';
 import type { DataContextValue, FileUploadParams } from './types';
-import { storage, STORAGE_PATHS, isFileSizeValid, isFileTypeSupported } from '@/lib/firebase/storage';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { isFileSizeValid, isFileTypeSupported, STORAGE_PATHS } from '@/shared/utils/fileUtils';
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, app } from '@/lib/firebase/config';
 import { useAuth } from './AuthContext';
 
 // Context作成
@@ -24,6 +24,9 @@ const DataContext = createContext<DataContextValue | undefined>(undefined);
  * DataProvider - アプリケーション全体のデータを管理
  */
 export function DataProvider({ children }: { children: ReactNode }) {
+  // Firebase Storageインスタンスを作成
+  const storage = useMemo(() => getStorage(app), []);
+  
   // 面談記録フック
   const {
     interviews,
@@ -126,7 +129,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       dev.error('ファイルアップロードエラー', error);
       throw error;
     }
-  }, [currentUser, userProfile]);
+  }, [currentUser, userProfile, storage]);
 
   // ファイル削除機能（管理者のみ）
   const deleteFile = useCallback(async (fileId: string) => {
@@ -164,7 +167,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       dev.error('ファイル削除エラー', error);
       throw error;
     }
-  }, [currentUser, userProfile]);
+  }, [currentUser, userProfile, storage]);
 
   // Context値をメモ化（re-render最小化）
   const value = useMemo<DataContextValue>(() => {
