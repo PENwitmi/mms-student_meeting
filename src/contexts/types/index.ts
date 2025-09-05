@@ -4,9 +4,11 @@
 
 import type { InterviewRecord, InterviewInput, InterviewUpdateInput } from './interview';
 import type { Student, StudentInput, StudentUpdateInput } from './student';
+import type { FileRecord, FileUploadParams } from './file';
 
 export * from './interview';
 export * from './student';
+export * from './file';
 
 /**
  * DataContextの値の型定義
@@ -15,17 +17,20 @@ export interface DataContextValue {
   // データ
   interviews: InterviewRecord[];
   students: Student[];
+  files: FileRecord[];
   
   // ローディング状態
   loading: {
     interviews: boolean;
     students: boolean;
+    files: boolean;
   };
   
   // エラー状態
   errors: {
     interviews: Error | null;
     students: Error | null;
+    files: Error | null;
   };
   
   // アクション
@@ -39,5 +44,9 @@ export interface DataContextValue {
     addStudent: (data: StudentInput) => Promise<void>;
     updateStudent: (id: string, data: StudentUpdateInput) => Promise<void>;
     deleteStudent: (id: string) => Promise<void>;
+    
+    // ファイル操作（管理者のみ）
+    uploadFile: (params: FileUploadParams) => Promise<void>;
+    deleteFile: (fileId: string) => Promise<void>;
   };
 }

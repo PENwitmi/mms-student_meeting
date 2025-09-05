@@ -6,6 +6,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { InterviewSection } from '@/features/interviews';
+import { StudentFileSection } from '@/features/files';
 import { NameEditSection } from '@/features/profile/components/NameEditSection';
 import { EmailChangeSection } from '@/features/profile/components/EmailChangeSection';
 import { PasswordChangeSection } from '@/features/profile/components/PasswordChangeSection';
@@ -68,6 +69,11 @@ export function Dashboard() {
 
         {/* 面談記録セクション */}
         <InterviewSection />
+        
+        {/* ファイル管理セクション */}
+        <div className="mt-12">
+          <StudentFileSection />
+        </div>
       </main>
     </div>
   );

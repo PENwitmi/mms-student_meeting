@@ -11,6 +11,7 @@ MMS Student Meeting System - A React/TypeScript/Firebase application for managin
 - ✅ Student self-registration implemented  
 - ✅ User profile editing (name, email, password)
 - ✅ All Firebase operations centralized in contexts
+- ✅ File storage feature (PDF/images upload, list, delete) - MVP implementation
 
 ## Essential Commands
 
@@ -79,7 +80,9 @@ src/
 - Password change with security verification (PasswordChangeSection.tsx)
 - Real-time profile updates without page reload
 
-### ✅ Recently Completed - Interview Content Redesign (2025-09-05)
+### ✅ Recently Completed Features
+
+#### Interview Content Redesign (2025-09-05)
 Successfully redesigned interview records for better educational alignment:
 - ✅ Required fields reduced from 4 to 2 (student & date only)
 - ✅ Topics tags and follow-up fields removed (deprecated but maintained for backward compatibility)
@@ -90,6 +93,15 @@ Successfully redesigned interview records for better educational alignment:
   - Homework Plan (家庭学習計画)
   - Other Notes (その他の話し合い内容)
 - Documentation: `docs/04_interview_content_redesign/`
+
+#### File Storage Feature - MVP (2025-09-05)
+Implemented basic file management system:
+- ✅ Firebase Storage integration
+- ✅ Admin-only file upload (PDF, images including HEIC)
+- ✅ File list display by student
+- ✅ Delete functionality (admin only)
+- ✅ Simple preview (opens in new tab)
+- Documentation: `docs/07_file_storage_feature/`
 
 ### Test Users
 ```
