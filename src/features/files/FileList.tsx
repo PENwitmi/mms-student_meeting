@@ -67,15 +67,20 @@ export function FileList({ studentId, studentName }: FileListProps) {
     });
   };
 
-  // HEICファイルの場合は変換済みJPEGのURLを返す
-  const getDisplayUrl = (file: FileRecord) => {
-    // HEICファイルの場合、変換済みJPEGのURLを生成
+  // HEICファイルの場合は警告表示
+  const handleFileClick = (file: FileRecord) => {
     if (file.fileName.match(/\.(heic|heif)$/i)) {
-      // Storageパスから変換済みファイルのURLを生成
-      // 例: sample.heic → sample_converted.jpg
-      return file.fileUrl.replace(/\.(heic|heif)$/i, '_converted.jpg');
+      alert(
+        'このファイルはiPhoneの画像形式（HEIC）です。\n' +
+        'Safari以外のブラウザでは表示できない場合があります。\n\n' +
+        '【対処法】\n' +
+        'Safariブラウザでアクセスするか、\n' +
+        'iPhone設定でJPEG形式に変更してください。'
+      );
+      return;
     }
-    return file.fileUrl;
+    // 通常のファイルは新しいタブで開く
+    window.open(file.fileUrl, '_blank');
   };
 
   if (loading) {
@@ -152,6 +157,11 @@ export function FileList({ studentId, studentName }: FileListProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {file.fileName}
+                        {file.fileName.match(/\.(heic|heif)$/i) && (
+                          <span className="ml-2 text-xs text-yellow-600" title="Safari以外では表示できない可能性があります">
+                            ⚠️ HEIC
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-gray-500">
                         {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}
@@ -166,15 +176,13 @@ export function FileList({ studentId, studentName }: FileListProps) {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <a
-                      href={getDisplayUrl(file)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => handleFileClick(file)}
                       className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-gray-100 rounded"
                       title="ファイルを開く"
                     >
                       <ExternalLink className="h-4 w-4" />
-                    </a>
+                    </button>
                     
                     {isAdmin && (
                       <button

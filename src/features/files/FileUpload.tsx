@@ -45,6 +45,20 @@ export function FileUpload({ studentId, studentName, onClose, onSuccess }: FileU
   const handleFileSelect = (selectedFile: File) => {
     setError(null);
     
+    // HEICファイル警告
+    if (selectedFile.name.match(/\.(heic|heif)$/i)) {
+      const userConfirm = window.confirm(
+        'iPhoneの画像形式（HEIC）は一部のブラウザで表示できません。\n\n' +
+        '【推奨設定】\n' +
+        'iPhone: 設定 > カメラ > フォーマット > 「互換性優先」を選択\n' +
+        '※これによりJPEG形式で撮影されるようになります\n\n' +
+        'このままアップロードしますか？'
+      );
+      if (!userConfirm) {
+        return;
+      }
+    }
+    
     // ファイルサイズチェック（10MB）
     if (selectedFile.size > 10 * 1024 * 1024) {
       setError('ファイルサイズは10MB以下にしてください');

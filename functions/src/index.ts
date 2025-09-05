@@ -1,4 +1,4 @@
-import { storage } from 'firebase-functions/v1';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 import * as path from 'path';
@@ -7,8 +7,10 @@ import * as fs from 'fs';
 
 admin.initializeApp();
 
-// HEIC → JPEG変換関数（シンプルな実装）
-export const convertHeicToJpeg = storage
+// HEIC → JPEG変換関数（大阪リージョン）
+export const convertHeicToJpeg = functions
+  .region('asia-northeast2')  // 大阪リージョン
+  .storage
   .object()
   .onFinalize(async (object) => {
     const filePath = object.name;
