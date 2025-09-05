@@ -67,6 +67,17 @@ export function FileList({ studentId, studentName }: FileListProps) {
     });
   };
 
+  // HEICファイルの場合は変換済みJPEGのURLを返す
+  const getDisplayUrl = (file: FileRecord) => {
+    // HEICファイルの場合、変換済みJPEGのURLを生成
+    if (file.fileName.match(/\.(heic|heif)$/i)) {
+      // Storageパスから変換済みファイルのURLを生成
+      // 例: sample.heic → sample_converted.jpg
+      return file.fileUrl.replace(/\.(heic|heif)$/i, '_converted.jpg');
+    }
+    return file.fileUrl;
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
@@ -156,7 +167,7 @@ export function FileList({ studentId, studentName }: FileListProps) {
                   
                   <div className="flex items-center space-x-2">
                     <a
-                      href={file.fileUrl}
+                      href={getDisplayUrl(file)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-gray-100 rounded"
