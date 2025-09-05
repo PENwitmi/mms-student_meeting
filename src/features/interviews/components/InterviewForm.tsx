@@ -24,7 +24,6 @@ export const InterviewForm: React.FC<InterviewFormProps> = ({
     touched,
     isSubmitting,
     isValid,
-    isDirty,
     handleChange,
     handleStudentChange,
     handleBlur,

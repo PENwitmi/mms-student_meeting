@@ -39,24 +39,16 @@ export const InterviewList: React.FC<InterviewListProps> = ({
         }
       }
 
-      // トピックでフィルタ
-      if (filters.topics && filters.topics.length > 0) {
-        const hasMatchingTopic = filters.topics.some(filterTopic => 
-          interview.topics.some(interviewTopic => 
-            interviewTopic.toLowerCase().includes(filterTopic.toLowerCase())
-          )
-        );
-        if (!hasMatchingTopic) return false;
-      }
-
       // 検索キーワードでフィルタ
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
         const searchableText = [
           interview.studentName,
-          interview.notes,
-          interview.followUp || '',
-          ...interview.topics
+          interview.otherNotes || '',
+          interview.weeklyGoodPoints || '',
+          interview.weeklyMorePoints || '',
+          interview.lessonPlan || '',
+          interview.homeworkPlan || ''
         ].join(' ').toLowerCase();
         
         if (!searchableText.includes(searchTerm)) {

@@ -72,6 +72,7 @@ export interface InterviewUpdateInput {
 // フォームバリデーション用
 export interface ValidationErrors {
   studentId?: string;
+  studentName?: string;  // 学生名のバリデーション
   date?: string;
   
   // 新フィールドのバリデーション（すべて任意のためエラーは基本的に発生しない）
@@ -85,6 +86,7 @@ export interface ValidationErrors {
   topics?: string;
   notes?: string;
   followUp?: string;
+  attachments?: string;
 }
 
 // フィルター用
