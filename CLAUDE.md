@@ -5,13 +5,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 MMS Student Meeting System - A React/TypeScript/Firebase application for managing weekly student counseling sessions. MVP implementation with admin and student roles. Features simplified interview recording with only 2 required fields (student/date) and 5 optional content sections for comprehensive educational tracking.
 
-## Current Status (2025-09-05)
+## Current Status (2025-09-05 - Latest)
+
+### Production (main branch - GitHub Pages)
 - ✅ Core CRUD functionality complete
 - ✅ Context API fully compliant with MMS Finance pattern
 - ✅ Student self-registration implemented  
 - ✅ User profile editing (name, email, password)
 - ✅ All Firebase operations centralized in contexts
+- ✅ Interview content redesign (5 optional fields)
+- 🌐 **Deployed at**: GitHub Pages (public)
+
+### Development (develop branch - NOT merged)
 - ✅ File storage feature (PDF/images upload, list, delete) - MVP implementation
+- ✅ Firebase Storage integration (Blaze plan required)
+- ✅ Context API strict pattern enhancement
+- ✅ Firebase Storage instantiation in DataContext only
+- ⚠️ **Status**: Ready to merge but held for review
 
 ## Essential Commands
 
@@ -24,32 +34,41 @@ npm run setup:users  # Initialize Firebase test users (after creating in Firebas
 
 ## Architecture Rules (CRITICAL - Based on MMS Finance Pattern)
 
-### Firebase Access Pattern
+### Firebase Access Pattern (Strict Compliance)
 1. **Firebase operations ONLY in `src/contexts/` directory**
-2. **`src/features/` components MUST NOT import Firebase directly**
-3. **All data access through Context API hooks only**
-4. **Realtime updates (onSnapshot) separate from one-time queries (getDocs)**
+2. **Firebase instances ONLY created in DataContext (not in lib/)**
+3. **`src/features/` components MUST NOT import Firebase directly**
+4. **All data access through Context API hooks only**
+5. **Realtime updates (onSnapshot) separate from one-time queries (getDocs)**
+6. **Pure utility functions in `shared/utils/` (Firebase-independent)**
 
 ### Directory Structure & Responsibilities
 ```
 src/
 ├── contexts/           # Firebase layer - ONLY place for Firebase operations
 │   ├── AuthContext.tsx # Authentication + user management (extended 2025-09-05)
-│   ├── DataContext.tsx # Centralized data management
+│   ├── DataContext.tsx # Centralized data management + Storage management
 │   └── hooks/         
 │       ├── realtime/   # onSnapshot hooks
 │       │   ├── useInterviews.ts
-│       │   └── useStudents.ts
+│       │   ├── useStudents.ts
+│       │   └── useFiles.ts      # File storage realtime hook
 │       └── query/      # getDocs hooks (future)
 ├── features/           # Business logic - NO Firebase imports allowed
 │   ├── interviews/     # Interview management
-│   └── profile/        # Profile editing components
-├── lib/firebase/       # Firebase configuration only
+│   ├── profile/        # Profile editing components
+│   └── files/          # File storage UI components
+│       ├── FileUpload.tsx
+│       ├── FileList.tsx
+│       └── StudentFileSection.tsx
+├── lib/firebase/       # Firebase configuration only (no Storage instance)
 ├── pages/              # Route components
 │   ├── Dashboard.tsx
 │   ├── Login.tsx
 │   └── Register.tsx   # Student self-registration
 └── shared/             # Shared types, utils, components
+    └── utils/
+        └── fileUtils.ts # Pure utility functions (Firebase-independent)
 ```
 
 ### Path Aliases (configured in vite.config.ts)
@@ -96,11 +115,14 @@ Successfully redesigned interview records for better educational alignment:
 
 #### File Storage Feature - MVP (2025-09-05)
 Implemented basic file management system:
-- ✅ Firebase Storage integration
+- ✅ Firebase Storage integration (Blaze plan - Osaka region)
 - ✅ Admin-only file upload (PDF, images including HEIC)
 - ✅ File list display by student
 - ✅ Delete functionality (admin only)
 - ✅ Simple preview (opens in new tab)
+- ✅ Max file size: 10MB
+- ✅ Storage path: `students/{studentId}/files`
+- 🔄 Firestore composite index needed: files (studentId + createdAt)
 - Documentation: `docs/07_file_storage_feature/`
 
 ### Test Users
@@ -108,6 +130,16 @@ Implemented basic file management system:
 Admin: admin@test.com / admin123
 Student: student@test.com / student123
 ```
+
+### Feature Availability by Branch
+| Feature | main (Production) | develop |
+|---------|------------------|---------|
+| Interview CRUD | ✅ | ✅ |
+| Student Registration | ✅ | ✅ |
+| Profile Edit | ✅ | ✅ |
+| **File Storage** | ❌ | ✅ |
+| **Firebase Storage** | ❌ | ✅ |
+| **Blaze Plan Required** | ❌ | ✅ |
 
 ## Data Models
 
@@ -154,6 +186,19 @@ interface InterviewRecord {
   createdAt: Date;
   updatedAt: Date;
 }
+
+interface FileRecord {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  studentId: string;
+  studentName: string;
+  uploadedBy: string;          // User ID of uploader
+  uploadedByName: string;      // Display name of uploader
+  createdAt: Date;
+}
 ```
 
 ## Development Principles
@@ -169,10 +214,21 @@ interface InterviewRecord {
 - Components use selective hooks (useInterviewsData, useStudentsData)
 - 92% reduction in Firebase reads achieved in MMS Finance
 
-## Firebase Security Rules
-- Admin users can read/write all data
-- Students can only read their own interview records
-- Authentication required for all operations
+## Firebase Configuration
+### Plan & Region
+- **Plan**: Blaze (Pay-as-you-go with free tier)
+- **Region**: asia-northeast2 (Osaka)
+- **Storage Bucket**: mms-student-meeting.appspot.com
+
+### Security Rules Status
+- **Firestore**: Admin can read/write all, students read own data only
+- **Storage**: Test mode (expires in 30 days from 2025-09-05)
+- **Authentication**: Required for all operations
+
+### Pending Tasks
+- 🔄 Create Firestore composite index: files (studentId + createdAt)
+- 🔄 Configure production Storage security rules
+- 🔄 Set up budget alerts for Blaze plan
 
 ## Environment Variables
 All Firebase configuration in `.env.local`:
@@ -208,23 +264,35 @@ interface AuthContextType {
 1. Always check user role before displaying features
 2. Use `useAuth()` hook for authentication state
 3. Use `useRequireAuth(role)` for role-based access control
-4. Use `useData()` or selective hooks (`useInterviewsData()`, `useStudentsData()`) for data access
+4. Use `useData()` or selective hooks (`useInterviewsData()`, `useStudentsData()`, `useFilesData()`) for data access
 5. Development logger available via `dev.log()`, `dev.warn()`, `dev.error()`
 6. All timestamps should use `serverTimestamp()` for consistency
 7. **Never import Firebase functions directly in features/ or pages/ layer**
-8. **Interview records use simplified model** - only student & date required
-9. **Profile changes update immediately** via updateUserProfile()
-10. **All Firebase operations must go through AuthContext or DataContext**
+8. **Never import from lib/firebase/storage (doesn't exist - use DataContext)**
+9. **Interview records use simplified model** - only student & date required
+10. **Profile changes update immediately** via updateUserProfile()
+11. **All Firebase operations must go through AuthContext or DataContext**
+12. **Firebase Storage instance created ONLY in DataContext**
+13. **Pure utility functions in shared/utils must be Firebase-independent**
 
-## Recent Changes (2025-09-05)
+## Recent Changes & Branch Status
 
-### Context API Compliance Refactoring
-- Removed all Firebase imports from features/ and pages/ directories
-- Added 4 new methods to AuthContext for user management
-- Deleted TestFirebase.tsx (Context API violation)
-- Refactored 5 components to use Context hooks exclusively
+### main branch (Production - GitHub Pages)
+- 2025-09-05 AM: Context API compliance refactoring
+- 2025-09-05 AM: Student registration & profile management
+- 2025-09-05 AM: Interview content redesign (5 optional fields)
+- Last merge: 2025-09-05 morning (commit: f027515)
+
+### develop branch (Development - NOT in production)
+- 2025-09-05 PM: File storage feature implementation
+- 2025-09-05 PM: Firebase Blaze plan migration
+- 2025-09-05 PM: Storage bucket configuration (Osaka region)
+- 2025-09-05 PM: Context API strict pattern (Storage in DataContext)
+- **23 files changed, 1917 lines added**
+- **Status**: Awaiting merge decision
 
 ### Documentation
-- `/docs/05/`: Context API refactoring and compliance reports
-- `/docs/04_interview_content_redesign/`: Interview field redesign
-- `/docs/03_student_account_management/`: Student account features
+- `/docs/05/`: Context API refactoring (in main)
+- `/docs/04_interview_content_redesign/`: Interview redesign (in main)
+- `/docs/03_student_account_management/`: Student features (in main)
+- `/docs/07_file_storage_feature/`: File storage docs (in develop only)
