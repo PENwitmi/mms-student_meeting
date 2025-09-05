@@ -18,10 +18,14 @@ export interface FileRecord {
   studentId: string;
   studentName: string;
   
+  // Content
+  description?: string;  // ファイル説明メモ（最大200文字）
+  
   // Metadata
   uploadedBy: string;
   uploadedByName?: string;
   createdAt: Date | Timestamp;
+  updatedAt?: Date | Timestamp;  // 最終更新日時
 }
 
 /**
@@ -31,4 +35,12 @@ export interface FileUploadParams {
   file: File;
   studentId: string;
   studentName: string;
+}
+
+/**
+ * ファイル情報更新時のパラメータ
+ */
+export interface FileUpdateParams {
+  fileId: string;
+  description: string;
 }

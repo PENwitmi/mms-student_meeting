@@ -4,7 +4,7 @@
 
 import type { InterviewRecord, InterviewInput, InterviewUpdateInput } from './interview';
 import type { Student, StudentInput, StudentUpdateInput } from './student';
-import type { FileRecord, FileUploadParams } from './file';
+import type { FileRecord, FileUploadParams, FileUpdateParams } from './file';
 
 export * from './interview';
 export * from './student';
@@ -48,5 +48,6 @@ export interface DataContextValue {
     // ファイル操作（管理者のみ）
     uploadFile: (params: FileUploadParams) => Promise<void>;
     deleteFile: (fileId: string) => Promise<void>;
+    updateFile: (params: FileUpdateParams) => Promise<void>;
   };
 }

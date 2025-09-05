@@ -10,10 +10,10 @@ import { useInterviews } from './hooks/realtime/useInterviews';
 import { useStudents } from './hooks/realtime/useStudents';
 import { useFiles } from './hooks/realtime/useFiles';
 import { dev } from '@/shared/utils/devLogger';
-import type { DataContextValue, FileUploadParams } from './types';
+import type { DataContextValue, FileUploadParams, FileUpdateParams } from './types';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { isFileSizeValid, isFileTypeSupported, STORAGE_PATHS } from '@/shared/utils/fileUtils';
-import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
 import { db, app } from '@/lib/firebase/config';
 import { useAuth } from './AuthContext';
 
@@ -165,6 +165,41 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [currentUser, userProfile, storage]);
 
+  // ファイル情報更新機能（管理者のみ）
+  const updateFile = useCallback(async (params: FileUpdateParams) => {
+    if (!currentUser) {
+      throw new Error('ログインが必要です');
+    }
+    
+    if (!userProfile) {
+      throw new Error('ユーザー情報を読み込み中です。もう一度お試しください');
+    }
+    
+    if (userProfile.role !== 'admin') {
+      throw new Error('管理者権限が必要です');
+    }
+
+    const { fileId, description } = params;
+
+    // 説明文の長さチェック
+    if (description.length > 200) {
+      throw new Error('説明文は200文字以内にしてください');
+    }
+
+    try {
+      // Firestoreのファイル情報を更新
+      await updateDoc(doc(db, 'files', fileId), {
+        description,
+        updatedAt: serverTimestamp()
+      });
+      
+      dev.log('ファイル情報更新完了', fileId);
+    } catch (error) {
+      dev.error('ファイル情報更新エラー', String(error));
+      throw error;
+    }
+  }, [currentUser, userProfile]);
+
   // Context値をメモ化（re-render最小化）
   const value = useMemo<DataContextValue>(() => {
     dev.log('DataContext', 'Context値更新', {
@@ -203,7 +238,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateStudent,
         deleteStudent,
         uploadFile,
-        deleteFile
+        deleteFile,
+        updateFile
       }
     };
   }, [
@@ -218,6 +254,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     filesError,
     uploadFile,
     deleteFile,
+    updateFile,
     // アクション関数は依存配列から除外（安定しているため）
   ]);
 

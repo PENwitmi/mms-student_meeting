@@ -3,12 +3,13 @@
  */
 
 import { useState } from 'react';
-import { FileText, Image, Trash2, ExternalLink, Upload } from 'lucide-react';
+import { FileText, Image, Trash2, ExternalLink, Upload, Edit3 } from 'lucide-react';
 import { useFilesData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatFileSize } from '@/shared/utils/fileUtils';
 import type { FileRecord } from '@/contexts/types';
 import { FileUpload } from './FileUpload';
+import { FileMemoEdit } from './FileMemoEdit';
 
 interface FileListProps {
   studentId: string;
@@ -18,6 +19,7 @@ interface FileListProps {
 export function FileList({ studentId, studentName }: FileListProps) {
   const [showUpload, setShowUpload] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingFile, setEditingFile] = useState<FileRecord | null>(null);
   
   const { userProfile } = useAuth();
   const { files, loading, error, deleteFile } = useFilesData();
@@ -144,6 +146,11 @@ export function FileList({ studentId, studentName }: FileListProps) {
                         {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}
                         {file.uploadedByName && ` • ${file.uploadedByName}`}
                       </p>
+                      {file.description && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          📝 {file.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                   
@@ -157,6 +164,16 @@ export function FileList({ studentId, studentName }: FileListProps) {
                     >
                       <ExternalLink className="h-4 w-4" />
                     </a>
+                    
+                    {isAdmin && (
+                      <button
+                        onClick={() => setEditingFile(file)}
+                        className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+                        title="メモを編集"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </button>
+                    )}
                     
                     {isAdmin && (
                       <button
@@ -182,6 +199,14 @@ export function FileList({ studentId, studentName }: FileListProps) {
           studentName={studentName}
           onClose={() => setShowUpload(false)}
           onSuccess={() => setShowUpload(false)}
+        />
+      )}
+
+      {editingFile && (
+        <FileMemoEdit
+          file={editingFile}
+          onClose={() => setEditingFile(null)}
+          onSuccess={() => setEditingFile(null)}
         />
       )}
     </>
