@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper: ユーザーが管理者かチェック
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper: 認証済みかチェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // users コレクション
+    match /users/{userId} {
+      // 自分の情報のみ読み取り可能
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // ユーザー作成は認証時のCloud Functions経由（直接書き込み禁止）
+      allow create: if false;
+      
+      // 更新は自分の lastLoginAt のみ
+      allow update: if isAuthenticated() && 
+                      request.auth.uid == userId &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLoginAt']);
+      
+      // 削除禁止
+      allow delete: if false;
+    }
+    
+    // interviews コレクション
+    match /interviews/{interviewId} {
+      // 読み取り: 管理者は全て、生徒は自分のもののみ
+      allow read: if isAdmin() || 
+                    (isAuthenticated() && resource.data.studentId == request.auth.uid);
+      
+      // 作成: 管理者のみ
+      allow create: if isAdmin() &&
+                      request.resource.data.createdBy == request.auth.uid;
+      
+      // 更新: 管理者のみ
+      allow update: if isAdmin();
+      
+      // 削除: 管理者のみ
+      allow delete: if isAdmin();
+    }
+  }
+}
