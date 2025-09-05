@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { DataProvider } from '@/contexts/DataContext'
 import { Login } from '@/pages/Login'
 import { Dashboard } from '@/pages/Dashboard'
 import { TestFirebase } from '@/pages/TestFirebase'
@@ -51,7 +52,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <DataProvider>
+          <AppRoutes />
+        </DataProvider>
       </AuthProvider>
     </BrowserRouter>
   )

@@ -5,6 +5,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { InterviewSection } from '@/features/interviews';
 import { dev } from '@/shared/utils/devLogger';
 
 export function Dashboard() {
@@ -42,7 +43,8 @@ export function Dashboard() {
 
       {/* メインコンテンツ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        {/* ユーザー情報 */}
+        <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">ユーザー情報</h2>
             <dl className="space-y-2">
@@ -61,6 +63,9 @@ export function Dashboard() {
             </dl>
           </div>
         </div>
+
+        {/* 面談記録セクション */}
+        <InterviewSection />
       </main>
     </div>
   );

@@ -5,15 +5,14 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "studentId", "order": "ASCENDING" },
-        { "fieldPath": "interviewDate", "order": "DESCENDING" }
+        { "fieldPath": "date", "order": "DESCENDING" }
       ]
     },
     {
       "collectionGroup": "interviews",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "createdBy", "order": "ASCENDING" },
-        { "fieldPath": "interviewDate", "order": "DESCENDING" }
+        { "fieldPath": "date", "order": "DESCENDING" }
       ]
     }
   ],
