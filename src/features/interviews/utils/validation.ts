@@ -2,16 +2,19 @@ import type { InterviewInput, ValidationErrors } from '@/contexts/types';
 
 /**
  * 面談記録フォームのバリデーションルール
+ * 2025-09-05: 簡素化 - 必須項目は学生と日付のみ
  */
 export const validateInterviewForm = (data: InterviewInput): ValidationErrors => {
   const errors: ValidationErrors = {};
 
-  // 学生選択
+  // ===== 必須項目（2つのみ） =====
+  
+  // 学生選択（必須）
   if (!data.studentId || !data.studentName) {
     errors.studentId = '学生を選択してください';
   }
 
-  // 日付
+  // 日付（必須）
   if (!data.date) {
     errors.date = '日付を入力してください';
   } else {
@@ -29,26 +32,12 @@ export const validateInterviewForm = (data: InterviewInput): ValidationErrors =>
     }
   }
 
-  // トピック
-  if (!data.topics || data.topics.length === 0) {
-    errors.topics = 'トピックを最低1つ入力してください';
-  } else if (data.topics.length > 10) {
-    errors.topics = 'トピックは10個以下にしてください';
-  }
+  // ===== 任意項目（文字数制限なし） =====
+  // 新フィールドはすべて任意で、文字数制限もなし
+  // weeklyGoodPoints, weeklyMorePoints, lessonPlan, homeworkPlan, otherNotes
 
-  // 面談内容
-  if (!data.notes || data.notes.trim().length === 0) {
-    errors.notes = '面談内容を入力してください';
-  } else if (data.notes.trim().length < 50) {
-    errors.notes = '面談内容は50文字以上入力してください';
-  } else if (data.notes.length > 5000) {
-    errors.notes = '面談内容は5000文字以内で入力してください';
-  }
-
-  // フォローアップ（オプション）
-  if (data.followUp && data.followUp.length > 1000) {
-    errors.followUp = 'フォローアップ事項は1000文字以内で入力してください';
-  }
+  // ===== 旧フィールド（互換性のため残す、実際には使用しない） =====
+  // topics, notes, followUp の検証は削除
 
   return errors;
 };

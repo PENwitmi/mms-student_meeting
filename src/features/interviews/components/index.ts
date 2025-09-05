@@ -5,5 +5,4 @@ export { InterviewList } from './InterviewList';
 export { InterviewCard } from './InterviewCard';
 export { InterviewFormModal } from './InterviewFormModal';
 export { StudentSelect } from './StudentSelect';
-export { TopicsInput } from './TopicsInput';
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';

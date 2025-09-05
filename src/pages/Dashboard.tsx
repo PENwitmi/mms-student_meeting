@@ -6,10 +6,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { InterviewSection } from '@/features/interviews';
+import { NameEditSection } from '@/features/profile/components/NameEditSection';
+import { EmailChangeSection } from '@/features/profile/components/EmailChangeSection';
+import { PasswordChangeSection } from '@/features/profile/components/PasswordChangeSection';
 import { dev } from '@/shared/utils/devLogger';
 
 export function Dashboard() {
-  const { user, userProfile, logout, isAdmin, isStudent } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -43,24 +46,23 @@ export function Dashboard() {
 
       {/* メインコンテンツ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ユーザー情報 */}
-        <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
-          <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">ユーザー情報</h2>
-            <dl className="space-y-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">メールアドレス</dt>
-                <dd className="mt-1 text-sm text-gray-900">{user?.email}</dd>
+        {/* アカウント設定セクション - グリッドレイアウト */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">アカウント設定</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 左側：プロフィール情報 */}
+            <NameEditSection />
+            
+            {/* 右側：ログイン設定（メールアドレス・パスワード） */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-4">ログイン設定</h3>
+              <div className="space-y-6">
+                <EmailChangeSection />
+                <div className="border-t pt-6">
+                  <PasswordChangeSection />
+                </div>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">ロール</dt>
-                <dd className="mt-1 text-sm text-gray-900">{userProfile?.role}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">氏名</dt>
-                <dd className="mt-1 text-sm text-gray-900">{userProfile?.name}</dd>
-              </div>
-            </dl>
+            </div>
           </div>
         </div>
 

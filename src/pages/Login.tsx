@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { dev } from '@/shared/utils/devLogger';
 
@@ -13,7 +13,11 @@ export function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
+  
+  // 登録成功メッセージの表示
+  const message = location.state?.message;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +49,13 @@ export function Login() {
             ログインしてください
           </p>
         </div>
+        
+        {/* 登録成功メッセージ */}
+        {message && (
+          <div className="rounded-md bg-green-50 p-4">
+            <div className="text-sm text-green-800">{message}</div>
+          </div>
+        )}
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
@@ -98,6 +109,19 @@ export function Login() {
             >
               {loading ? 'ログイン中...' : 'ログイン'}
             </button>
+          </div>
+
+          {/* 新規登録リンク */}
+          <div className="text-center">
+            <span className="text-sm text-gray-600">
+              アカウントをお持ちでない方は
+            </span>
+            <Link
+              to="/register"
+              className="font-medium text-indigo-600 hover:text-indigo-500 ml-1"
+            >
+              新規登録
+            </Link>
           </div>
 
           {/* 開発用：テストユーザー情報 */}

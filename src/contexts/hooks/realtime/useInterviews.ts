@@ -71,10 +71,21 @@ export function useInterviews() {
             studentId: docData.studentId,
             studentName: docData.studentName,
             date: docData.date?.toDate() || new Date(),
+            
+            // 新フィールド（任意）
+            weeklyGoodPoints: docData.weeklyGoodPoints || '',
+            weeklyMorePoints: docData.weeklyMorePoints || '',
+            lessonPlan: docData.lessonPlan || '',
+            homeworkPlan: docData.homeworkPlan || '',
+            otherNotes: docData.otherNotes || '',
+            
+            // 旧フィールド（互換性のため残す）
             topics: docData.topics || [],
             notes: docData.notes || '',
             followUp: docData.followUp,
             attachments: docData.attachments || [],
+            
+            // メタデータ
             createdBy: docData.createdBy,
             createdAt: docData.createdAt?.toDate() || new Date(),
             updatedAt: docData.updatedAt?.toDate() || new Date()

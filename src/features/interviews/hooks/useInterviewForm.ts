@@ -27,6 +27,15 @@ export const useInterviewForm = ({
       studentId: initialData?.studentId || '',
       studentName: initialData?.studentName || '',
       date: initialData?.date || new Date(),
+      
+      // 新フィールド（すべて任意）
+      weeklyGoodPoints: initialData?.weeklyGoodPoints || '',
+      weeklyMorePoints: initialData?.weeklyMorePoints || '',
+      lessonPlan: initialData?.lessonPlan || '',
+      homeworkPlan: initialData?.homeworkPlan || '',
+      otherNotes: initialData?.otherNotes || '',
+      
+      // 旧フィールド（互換性のため残す）
       topics: initialData?.topics || [],
       notes: initialData?.notes || '',
       followUp: initialData?.followUp || ''
@@ -99,7 +108,15 @@ export const useInterviewForm = ({
     }
 
     try {
-      await onSubmit(state.values);
+      // 旧フィールドから新フィールドへのデータ移行（必要に応じて）
+      const submitData = { ...state.values };
+      
+      // 旧notesフィールドが入力されていて、新otherNotesが空の場合は移行
+      if (submitData.notes && !submitData.otherNotes) {
+        submitData.otherNotes = submitData.notes;
+      }
+      
+      await onSubmit(submitData);
       onSuccess?.();
       
       // 成功後はフォームをリセット（新規作成の場合）
@@ -109,6 +126,11 @@ export const useInterviewForm = ({
             studentId: '',
             studentName: '',
             date: new Date(),
+            weeklyGoodPoints: '',
+            weeklyMorePoints: '',
+            lessonPlan: '',
+            homeworkPlan: '',
+            otherNotes: '',
             topics: [],
             notes: '',
             followUp: ''
@@ -129,19 +151,23 @@ export const useInterviewForm = ({
   const currentErrors = validateInterviewForm(state.values);
   const isValid = !hasValidationErrors(currentErrors);
   
+  // isDirtyの判定を簡素化（必須項目のみチェック）
   const isDirty = initialData 
     ? JSON.stringify(state.values) !== JSON.stringify({
         studentId: initialData.studentId,
         studentName: initialData.studentName,
         date: initialData.date,
-        topics: initialData.topics,
-        notes: initialData.notes,
-        followUp: initialData.followUp
+        weeklyGoodPoints: initialData.weeklyGoodPoints || '',
+        weeklyMorePoints: initialData.weeklyMorePoints || '',
+        lessonPlan: initialData.lessonPlan || '',
+        homeworkPlan: initialData.homeworkPlan || '',
+        otherNotes: initialData.otherNotes || '',
+        topics: initialData.topics || [],
+        notes: initialData.notes || '',
+        followUp: initialData.followUp || ''
       })
-    : // 新規作成時は必須項目が入力されているかチェック
-      Boolean(state.values.studentId && 
-              state.values.topics.length > 0 && 
-              state.values.notes);
+    : // 新規作成時は必須項目（学生と日付）が入力されているかチェック
+      Boolean(state.values.studentId && state.values.date);
 
   return {
     values: state.values,

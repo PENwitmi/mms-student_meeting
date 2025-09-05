@@ -3,7 +3,14 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-MMS Student Meeting System - A React/TypeScript/Firebase application for managing weekly student counseling sessions. Currently implementing MVP with admin and student roles only.
+MMS Student Meeting System - A React/TypeScript/Firebase application for managing weekly student counseling sessions. MVP implementation with admin and student roles. Features simplified interview recording with only 2 required fields (student/date) and 5 optional content sections for comprehensive educational tracking.
+
+## Current Status (2025-09-05)
+- ✅ Core CRUD functionality complete
+- ✅ Context API fully compliant with MMS Finance pattern
+- ✅ Student self-registration implemented  
+- ✅ User profile editing (name, email, password)
+- ✅ All Firebase operations centralized in contexts
 
 ## Essential Commands
 
@@ -26,14 +33,21 @@ npm run setup:users  # Initialize Firebase test users (after creating in Firebas
 ```
 src/
 ├── contexts/           # Firebase layer - ONLY place for Firebase operations
-│   ├── AuthContext.tsx # Authentication state management
-│   ├── DataContext.tsx # Centralized data management (to be implemented)
+│   ├── AuthContext.tsx # Authentication + user management (extended 2025-09-05)
+│   ├── DataContext.tsx # Centralized data management
 │   └── hooks/         
 │       ├── realtime/   # onSnapshot hooks
-│       └── query/      # getDocs hooks
+│       │   ├── useInterviews.ts
+│       │   └── useStudents.ts
+│       └── query/      # getDocs hooks (future)
 ├── features/           # Business logic - NO Firebase imports allowed
+│   ├── interviews/     # Interview management
+│   └── profile/        # Profile editing components
 ├── lib/firebase/       # Firebase configuration only
 ├── pages/              # Route components
+│   ├── Dashboard.tsx
+│   ├── Login.tsx
+│   └── Register.tsx   # Student self-registration
 └── shared/             # Shared types, utils, components
 ```
 
@@ -45,25 +59,43 @@ src/
 - `@lib/` → `src/lib/`
 - `@pages/` → `src/pages/`
 
-## Current Implementation Status
+## Completed Features
 
-### Completed
+### Core Functionality
 - Firebase Authentication with role-based access (admin/student)
-- AuthContext with user profile integration
+- AuthContext with user profile integration (extended 2025-09-05)
+- DataContext for centralized data management
+- Interview CRUD operations (Create/Read/Update/Delete)
+- Admin dashboard with full interview management
+- Student dashboard with read-only view of own records
+- Real-time data synchronization using onSnapshot
 - Login/logout functionality
-- Basic routing with protected routes
+- Protected routes with role-based access control
+
+### User Management (2025-09-05)
+- Student self-registration (Register.tsx)
+- Profile name editing (NameEditSection.tsx)
+- Email change with reauthentication (EmailChangeSection.tsx)
+- Password change with security verification (PasswordChangeSection.tsx)
+- Real-time profile updates without page reload
+
+### ✅ Recently Completed - Interview Content Redesign (2025-09-05)
+Successfully redesigned interview records for better educational alignment:
+- ✅ Required fields reduced from 4 to 2 (student & date only)
+- ✅ Topics tags and follow-up fields removed (deprecated but maintained for backward compatibility)
+- ✅ 5 new optional content sections implemented:
+  - Weekly Good Points (成長点・良かった点)
+  - Weekly More Points (改善点・課題)
+  - Lesson Plan (授業計画)
+  - Homework Plan (家庭学習計画)
+  - Other Notes (その他の話し合い内容)
+- Documentation: `docs/04_interview_content_redesign/`
 
 ### Test Users
 ```
 Admin: admin@test.com / admin123
 Student: student@test.com / student123
 ```
-
-### Pending Implementation
-- DataContext for interview record management
-- Interview CRUD operations
-- Admin dashboard features
-- Student read-only views
 
 ## Data Models
 
@@ -76,17 +108,36 @@ interface UserProfile {
   email: string;
   role: UserRole;
   name: string;
+  studentId?: string;  // For student users
+  grade?: number;      // For student users
+  class?: string;      // For student users
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface InterviewRecord {
   id: string;
-  studentId: string;
-  date: Date;
-  topics: string[];
-  notes: string;
-  followUp?: string;
+  studentId: string;           // Required
+  studentName: string;
+  date: Date;                  // Required
+  
+  // Weekly Review (all optional)
+  weeklyGoodPoints?: string;   // 良かった点・成長点
+  weeklyMorePoints?: string;   // 改善点・課題点
+  
+  // Future Plans (all optional)
+  lessonPlan?: string;         // 授業計画
+  homeworkPlan?: string;       // 家庭学習計画
+  
+  // Other (optional)
+  otherNotes?: string;         // その他の話し合い内容
+  
+  // Deprecated fields (backward compatibility)
+  topics?: string[];           // @deprecated - removed from UI
+  notes?: string;              // @deprecated - use otherNotes
+  followUp?: string;           // @deprecated - removed from UI
+  
+  // Metadata
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -122,16 +173,46 @@ VITE_FIREBASE_MESSAGING_SENDER_ID
 VITE_FIREBASE_APP_ID
 ```
 
-## Key Implementation Files
-- `src/contexts/AuthContext.tsx` - Authentication management
-- `src/lib/firebase/config.ts` - Firebase initialization
-- `src/pages/Login.tsx` - Login interface
-- `src/pages/Dashboard.tsx` - User dashboard with logout
-- `scripts/setupUsers.js` - User profile initialization script
+## AuthContext Methods (Extended 2025-09-05)
+
+The AuthContext now provides these methods for centralized Firebase operations:
+
+```typescript
+interface AuthContextType {
+  // Original methods
+  signIn: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  
+  // New methods (2025-09-05)
+  updateUserName: (name: string) => Promise<void>;
+  changeEmail: (currentPassword: string, newEmail: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  registerStudent: (data: RegisterData) => Promise<void>;
+}
+```
 
 ## Important Notes
 1. Always check user role before displaying features
 2. Use `useAuth()` hook for authentication state
 3. Use `useRequireAuth(role)` for role-based access control
-4. Development logger available via `dev.log()`, `dev.warn()`, `dev.error()`
-5. All timestamps should use `serverTimestamp()` for consistency
+4. Use `useData()` or selective hooks (`useInterviewsData()`, `useStudentsData()`) for data access
+5. Development logger available via `dev.log()`, `dev.warn()`, `dev.error()`
+6. All timestamps should use `serverTimestamp()` for consistency
+7. **Never import Firebase functions directly in features/ or pages/ layer**
+8. **Interview records use simplified model** - only student & date required
+9. **Profile changes update immediately** via updateUserProfile()
+10. **All Firebase operations must go through AuthContext or DataContext**
+
+## Recent Changes (2025-09-05)
+
+### Context API Compliance Refactoring
+- Removed all Firebase imports from features/ and pages/ directories
+- Added 4 new methods to AuthContext for user management
+- Deleted TestFirebase.tsx (Context API violation)
+- Refactored 5 components to use Context hooks exclusively
+
+### Documentation
+- `/docs/05/`: Context API refactoring and compliance reports
+- `/docs/04_interview_content_redesign/`: Interview field redesign
+- `/docs/03_student_account_management/`: Student account features

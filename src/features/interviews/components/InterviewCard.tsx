@@ -14,7 +14,7 @@ export const InterviewCard: React.FC<InterviewCardProps> = ({
   onDelete,
   canEdit 
 }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('ja-JP', {
@@ -25,10 +25,54 @@ export const InterviewCard: React.FC<InterviewCardProps> = ({
     });
   };
 
-  const shouldShowReadMore = interview.notes.length > 150;
-  const displayNotes = expanded || !shouldShowReadMore 
-    ? interview.notes 
-    : interview.notes.substring(0, 150) + '...';
+  const toggleExpand = (sectionKey: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
+  };
+
+  const renderTextSection = (
+    title: string,
+    content: string | undefined,
+    sectionKey: string,
+    colorClass: string = 'bg-gray-50'
+  ) => {
+    if (!content) return null;
+    
+    const shouldTruncate = content.length > 150;
+    const isExpanded = expandedSections[sectionKey];
+    const displayContent = isExpanded || !shouldTruncate
+      ? content
+      : content.substring(0, 150) + '...';
+
+    return (
+      <div className={`${colorClass} rounded-md p-3 mb-3`}>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2">{title}</h4>
+        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+          {displayContent}
+        </p>
+        {shouldTruncate && (
+          <button
+            onClick={() => toggleExpand(sectionKey)}
+            className="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium focus:outline-none focus:underline"
+          >
+            {isExpanded ? '閉じる' : '続きを読む'}
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  // データが存在するかチェック（旧フィールドと新フィールドの両方をチェック）
+  const hasAnyContent = 
+    interview.weeklyGoodPoints ||
+    interview.weeklyMorePoints ||
+    interview.lessonPlan ||
+    interview.homeworkPlan ||
+    interview.otherNotes ||
+    interview.notes ||  // 旧フィールドも確認（互換性のため）
+    interview.followUp; // 旧フィールドも確認（互換性のため）
 
   return (
     <article className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-6 border border-gray-200">
@@ -69,50 +113,62 @@ export const InterviewCard: React.FC<InterviewCardProps> = ({
         )}
       </header>
 
-      {/* トピックタグ */}
-      {interview.topics.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {interview.topics.map((topic, index) => (
-            <span
-              key={index}
-              className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-            >
-              {topic}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* コンテンツセクション */}
+      <div className="space-y-3">
+        {/* 週次振り返り */}
+        {(interview.weeklyGoodPoints || interview.weeklyMorePoints) && (
+          <div className="border-l-4 border-blue-500 pl-3">
+            <h3 className="text-sm font-bold text-gray-800 mb-2">週次振り返り</h3>
+            {renderTextSection('Good Point', interview.weeklyGoodPoints, 'goodPoints', 'bg-green-50')}
+            {renderTextSection('More Point', interview.weeklyMorePoints, 'morePoints', 'bg-yellow-50')}
+          </div>
+        )}
 
-      {/* 面談内容 */}
-      <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">面談内容</h4>
-        <div className="text-gray-700 text-sm leading-relaxed">
-          <p className="whitespace-pre-wrap">{displayNotes}</p>
-          {shouldShowReadMore && (
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium focus:outline-none focus:underline"
-            >
-              {expanded ? '閉じる' : '続きを読む'}
-            </button>
-          )}
-        </div>
-      </div>
+        {/* 今後の計画 */}
+        {(interview.lessonPlan || interview.homeworkPlan) && (
+          <div className="border-l-4 border-indigo-500 pl-3">
+            <h3 className="text-sm font-bold text-gray-800 mb-2">今後の計画</h3>
+            {renderTextSection('授業計画', interview.lessonPlan, 'lessonPlan', 'bg-indigo-50')}
+            {renderTextSection('家庭学習計画', interview.homeworkPlan, 'homeworkPlan', 'bg-purple-50')}
+          </div>
+        )}
 
-      {/* フォローアップ事項 */}
-      {interview.followUp && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-          <h4 className="text-sm font-medium text-yellow-800 mb-2 flex items-center">
-            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            フォローアップ事項
-          </h4>
-          <p className="text-sm text-yellow-700 whitespace-pre-wrap">
-            {interview.followUp}
+        {/* その他 */}
+        {interview.otherNotes && (
+          <div className="border-l-4 border-gray-500 pl-3">
+            <h3 className="text-sm font-bold text-gray-800 mb-2">その他</h3>
+            {renderTextSection('話し合い内容', interview.otherNotes, 'otherNotes', 'bg-gray-50')}
+          </div>
+        )}
+
+        {/* 旧フィールドの表示（互換性のため） */}
+        {interview.notes && !interview.otherNotes && (
+          <div className="border-l-4 border-orange-500 pl-3">
+            {renderTextSection('面談内容（旧形式）', interview.notes, 'notes', 'bg-orange-50')}
+          </div>
+        )}
+        
+        {interview.followUp && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+            <h4 className="text-sm font-medium text-yellow-800 mb-2 flex items-center">
+              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              フォローアップ事項（旧形式）
+            </h4>
+            <p className="text-sm text-yellow-700 whitespace-pre-wrap">
+              {interview.followUp}
+            </p>
+          </div>
+        )}
+
+        {/* 内容が何もない場合 */}
+        {!hasAnyContent && (
+          <p className="text-gray-400 text-sm text-center py-4">
+            記録内容なし
           </p>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* フッター（作成日時） */}
       <footer className="mt-4 pt-3 border-t border-gray-100">
