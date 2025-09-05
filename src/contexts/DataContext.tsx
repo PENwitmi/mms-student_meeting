@@ -4,7 +4,7 @@
  * MMS Financeパターンを適用
  */
 
-import { createContext, useContext, useMemo, useCallback, useState } from 'react';
+import { createContext, useContext, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useInterviews } from './hooks/realtime/useInterviews';
 import { useStudents } from './hooks/realtime/useStudents';
@@ -56,7 +56,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // 認証情報取得
   const { user: currentUser, userProfile } = useAuth();
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   // ファイルアップロード機能（管理者のみ）
   const uploadFile = useCallback(async (params: FileUploadParams) => {
@@ -98,7 +97,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       uploadTask.on('state_changed',
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
           dev.log('アップロード進捗', `${progress}%`);
         }
       );
@@ -122,11 +120,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         createdAt: serverTimestamp()
       });
       
-      setUploadProgress(0);
       dev.log('ファイルアップロード完了', fileName);
     } catch (error) {
-      setUploadProgress(0);
-      dev.error('ファイルアップロードエラー', error);
+      dev.error('ファイルアップロードエラー', String(error));
       throw error;
     }
   }, [currentUser, userProfile, storage]);
@@ -164,7 +160,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       
       dev.log('ファイル削除完了', fileId);
     } catch (error) {
-      dev.error('ファイル削除エラー', error);
+      dev.error('ファイル削除エラー', String(error));
       throw error;
     }
   }, [currentUser, userProfile, storage]);
