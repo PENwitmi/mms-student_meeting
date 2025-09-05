@@ -9,19 +9,15 @@ MMS Student Meeting System - A React/TypeScript/Firebase application for managin
 
 ### Production (main branch - GitHub Pages)
 - ✅ Core CRUD functionality complete
-- ✅ Context API fully compliant with MMS Finance pattern
+- ✅ Context API strictly compliant with MMS Finance pattern (enhanced)
 - ✅ Student self-registration implemented  
 - ✅ User profile editing (name, email, password)
 - ✅ All Firebase operations centralized in contexts
 - ✅ Interview content redesign (5 optional fields)
-- 🌐 **Deployed at**: GitHub Pages (public)
-
-### Development (develop branch - NOT merged)
-- ✅ File storage feature (PDF/images upload, list, delete) - MVP implementation
-- ✅ Firebase Storage integration (Blaze plan required)
-- ✅ Context API strict pattern enhancement
+- ✅ File storage feature (PDF/images upload, list, delete) - **MERGED**
+- ✅ Firebase Storage integration (Blaze plan - Osaka region)
 - ✅ Firebase Storage instantiation in DataContext only
-- ⚠️ **Status**: Ready to merge but held for review
+- 🌐 **Deployed at**: GitHub Pages (public)
 
 ## Essential Commands
 
@@ -131,15 +127,16 @@ Admin: admin@test.com / admin123
 Student: student@test.com / student123
 ```
 
-### Feature Availability by Branch
-| Feature | main (Production) | develop |
-|---------|------------------|---------|
-| Interview CRUD | ✅ | ✅ |
-| Student Registration | ✅ | ✅ |
-| Profile Edit | ✅ | ✅ |
-| **File Storage** | ❌ | ✅ |
-| **Firebase Storage** | ❌ | ✅ |
-| **Blaze Plan Required** | ❌ | ✅ |
+### Feature Availability
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Interview CRUD | ✅ Production | Core functionality |
+| Student Registration | ✅ Production | Self-registration enabled |
+| Profile Edit | ✅ Production | Name, email, password |
+| File Storage | ✅ Production | Admin upload, student view |
+| Firebase Storage | ✅ Production | Blaze plan (Osaka region) |
+| Firestore Index | ⚠️ Manual setup needed | files (studentId + createdAt) |
+| Storage Security | ⚠️ Test mode | Expires 30 days from 2025-09-05 |
 
 ## Data Models
 
@@ -275,24 +272,23 @@ interface AuthContextType {
 12. **Firebase Storage instance created ONLY in DataContext**
 13. **Pure utility functions in shared/utils must be Firebase-independent**
 
-## Recent Changes & Branch Status
+## Recent Changes (2025-09-05)
 
-### main branch (Production - GitHub Pages)
-- 2025-09-05 AM: Context API compliance refactoring
-- 2025-09-05 AM: Student registration & profile management
-- 2025-09-05 AM: Interview content redesign (5 optional fields)
-- Last merge: 2025-09-05 morning (commit: f027515)
+### Successfully Merged to Production
+- ✅ File storage feature implementation (23 files, 2007 lines added)
+- ✅ Firebase Blaze plan migration (Osaka region)
+- ✅ Storage bucket configuration (.appspot.com)
+- ✅ Context API strict pattern enhancement
+- ✅ TypeScript build errors fixed
+- Latest commit: e2be76f (merged from develop)
 
-### develop branch (Development - NOT in production)
-- 2025-09-05 PM: File storage feature implementation
-- 2025-09-05 PM: Firebase Blaze plan migration
-- 2025-09-05 PM: Storage bucket configuration (Osaka region)
-- 2025-09-05 PM: Context API strict pattern (Storage in DataContext)
-- **23 files changed, 1917 lines added**
-- **Status**: Awaiting merge decision
+### Deployment Timeline
+- Morning: Context API refactoring, student features, interview redesign
+- Afternoon: File storage development on develop branch
+- Evening: **MERGED** - File storage now in production
 
 ### Documentation
-- `/docs/05/`: Context API refactoring (in main)
-- `/docs/04_interview_content_redesign/`: Interview redesign (in main)
-- `/docs/03_student_account_management/`: Student features (in main)
-- `/docs/07_file_storage_feature/`: File storage docs (in develop only)
+- `/docs/05/`: Context API refactoring
+- `/docs/04_interview_content_redesign/`: Interview redesign
+- `/docs/03_student_account_management/`: Student features
+- `/docs/07_file_storage_feature/`: File storage implementation
