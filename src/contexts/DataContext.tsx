@@ -109,7 +109,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       
       // Firestoreにメタデータを保存
       await addDoc(collection(db, 'files'), {
-        fileName: file.name,
+        fileName,  // タイムスタンプ付きのファイル名を保存
         fileUrl: downloadUrl,
         fileSize: file.size,
         fileType: file.type,

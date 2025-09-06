@@ -152,12 +152,12 @@ export function FileList({ studentId, studentName }: FileListProps) {
                         {file.fileName}
                         {file.fileName.match(/\.(heic|heif)$/i) && file.convertedFileUrl && (
                           <span className="ml-2 text-xs text-green-600" title="JPEG変換済み">
-                            ✅ 変換済
+                            ✅ JPEG変換済み
                           </span>
                         )}
                         {file.fileName.match(/\.(heic|heif)$/i) && !file.convertedFileUrl && (
-                          <span className="ml-2 text-xs text-yellow-600" title="変換処理中">
-                            ⏳ 変換中
+                          <span className="ml-2 text-xs text-yellow-600" title="JPEG変換処理中">
+                            ⏳ JPEG変換中...
                           </span>
                         )}
                       </p>

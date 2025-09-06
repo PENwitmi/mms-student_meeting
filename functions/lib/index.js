@@ -43,6 +43,7 @@ const sharp_1 = __importDefault(require("sharp"));
 const path = __importStar(require("path"));
 const os = __importStar(require("os"));
 const fs = __importStar(require("fs"));
+const heicConvert = require('heic-convert');
 admin.initializeApp();
 // HEIC → JPEG変換関数（大阪リージョン）
 exports.convertHeicToJpeg = functions
@@ -71,7 +72,7 @@ exports.convertHeicToJpeg = functions
         console.log('Already converted file');
         return null;
     }
-    const bucket = admin.storage().bucket('mms-student-meeting.appspot.com');
+    const bucket = admin.storage().bucket();
     const fileName = path.basename(filePath);
     const fileDir = path.dirname(filePath);
     const nameWithoutExt = path.basename(fileName, path.extname(fileName));
@@ -84,16 +85,23 @@ exports.convertHeicToJpeg = functions
         await bucket.file(filePath).download({
             destination: tempFilePath
         });
-        // 2. Sharp でJPEG変換
+        // 2. HEICを読み込んでJPEGに変換
         console.log('Converting to JPEG...');
-        await (0, sharp_1.default)(tempFilePath)
+        const inputBuffer = await fs.promises.readFile(tempFilePath);
+        const outputBuffer = await heicConvert({
+            buffer: inputBuffer,
+            format: 'JPEG',
+            quality: 0.9
+        });
+        // 3. Sharpで最適化して保存
+        await (0, sharp_1.default)(outputBuffer)
             .jpeg({
             quality: 90,
             progressive: true,
             mozjpeg: true
         })
             .toFile(tempJpegPath);
-        // 3. 変換済みJPEGをアップロード
+        // 4. 変換済みJPEGをアップロード
         const jpegFilePath = path.join(fileDir, `${nameWithoutExt}_converted.jpg`);
         console.log('Uploading converted JPEG:', jpegFilePath);
         await bucket.upload(tempJpegPath, {
@@ -106,14 +114,29 @@ exports.convertHeicToJpeg = functions
                 }
             }
         });
-        // 4. Firestoreにも変換済みファイル情報を記録
+        // 5. Firestoreにも変換済みファイル情報を記録（リトライ付き）
         const db = admin.firestore();
-        const originalFileDoc = await db.collection('files')
-            .where('fileName', '==', fileName)
-            .limit(1)
-            .get();
-        if (!originalFileDoc.empty) {
+        console.log('Searching Firestore for fileName:', fileName);
+        // リトライロジック（最大3回、2秒間隔）
+        let originalFileDoc = null;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            originalFileDoc = await db.collection('files')
+                .where('fileName', '==', fileName)
+                .limit(1)
+                .get();
+            if (!originalFileDoc.empty) {
+                console.log(`Firestore query result: found ${originalFileDoc.docs.length} docs (attempt ${attempt})`);
+                break;
+            }
+            console.log(`Firestore query result: empty (attempt ${attempt}/3)`);
+            if (attempt < 3) {
+                console.log('Waiting 2 seconds before retry...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+        if (originalFileDoc && !originalFileDoc.empty) {
             const doc = originalFileDoc.docs[0];
+            console.log('Updating Firestore document:', doc.id);
             await doc.ref.update({
                 convertedFileName: `${nameWithoutExt}_converted.jpg`,
                 convertedFileUrl: await bucket.file(jpegFilePath).getSignedUrl({
@@ -122,8 +145,12 @@ exports.convertHeicToJpeg = functions
                 }).then(urls => urls[0]),
                 convertedAt: admin.firestore.FieldValue.serverTimestamp()
             });
+            console.log('Firestore update successful');
         }
-        // 5. 一時ファイル削除
+        else {
+            console.log('Warning: Could not find original file document in Firestore after 3 attempts');
+        }
+        // 6. 一時ファイル削除
         fs.unlinkSync(tempFilePath);
         fs.unlinkSync(tempJpegPath);
         console.log('Successfully converted:', filePath, '->', jpegFilePath);
