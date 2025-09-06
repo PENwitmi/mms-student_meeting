@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 MMS Student Meeting System - A React/TypeScript/Firebase application for managing weekly student counseling sessions. MVP implementation with admin and student roles. Features simplified interview recording with only 2 required fields (student/date) and 5 optional content sections for comprehensive educational tracking.
 
-## Current Status (2025-09-05 - Latest)
+## Current Status (2025-09-06 - Latest)
 
 ### Production (main branch - GitHub Pages)
 - ✅ Core CRUD functionality complete
@@ -18,6 +18,11 @@ MMS Student Meeting System - A React/TypeScript/Firebase application for managin
 - ✅ Firebase Storage integration (Blaze plan - Osaka region)
 - ✅ Firebase Storage instantiation in DataContext only
 - ✅ Production deployment fixed (.env.production file added)
+- ✅ **HEIC→JPEG自動変換機能** (2025-09-06完成)
+  - Firebase Functions (asia-northeast2)
+  - heic-convert + Sharp による変換
+  - ダウンロードトークンベースのURL生成
+- ✅ **ファイルメモ機能** (200文字の説明追加可能)
 - 🌐 **Deployed at**: https://penwitmi.github.io/mms-student_meeting/
 
 ## Essential Commands
