@@ -39,7 +39,8 @@ export const convertHeicToJpeg = functions
       return null;
     }
     
-    const bucket = admin.storage().bucket();
+    const bucketName = 'mms-student-meeting.firebasestorage.app';
+    const bucket = admin.storage().bucket(bucketName);
     const fileName = path.basename(filePath);
     const fileDir = path.dirname(filePath);
     const nameWithoutExt = path.basename(fileName, path.extname(fileName));
@@ -90,6 +91,7 @@ export const convertHeicToJpeg = functions
       
       // 5. Firestoreにも変換済みファイル情報を記録（リトライ付き）
       const db = admin.firestore();
+      const bucketName = 'mms-student-meeting.firebasestorage.app';
       console.log('Searching Firestore for fileName:', fileName);
       
       // リトライロジック（最大3回、2秒間隔）
@@ -115,12 +117,30 @@ export const convertHeicToJpeg = functions
       if (originalFileDoc && !originalFileDoc.empty) {
         const doc = originalFileDoc.docs[0];
         console.log('Updating Firestore document:', doc.id);
+        
+        // 変換済みファイルのメタデータを取得してURLを構築
+        // Firebase StorageのダウンロードトークンベースのURLを生成
+        const convertedFile = bucket.file(jpegFilePath);
+        const [metadata] = await convertedFile.getMetadata();
+        const token = metadata.metadata?.firebaseStorageDownloadTokens || 
+                     require('crypto').randomUUID();
+        
+        // トークンがない場合は設定
+        if (!metadata.metadata?.firebaseStorageDownloadTokens) {
+          await convertedFile.setMetadata({
+            metadata: {
+              firebaseStorageDownloadTokens: token
+            }
+          });
+        }
+        
+        // Firebase Storage形式のダウンロードURLを生成
+        const convertedFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(jpegFilePath)}?alt=media&token=${token}`;
+        console.log('Generated Firebase download URL for converted file');
+        
         await doc.ref.update({
           convertedFileName: `${nameWithoutExt}_converted.jpg`,
-          convertedFileUrl: await bucket.file(jpegFilePath).getSignedUrl({
-            action: 'read',
-            expires: '03-01-2500'
-          }).then(urls => urls[0]),
+          convertedFileUrl,
           convertedAt: admin.firestore.FieldValue.serverTimestamp()
         });
         console.log('Firestore update successful');

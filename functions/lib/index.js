@@ -55,6 +55,7 @@ exports.convertHeicToJpeg = functions
     .storage
     .object()
     .onFinalize(async (object) => {
+    var _a, _b;
     const filePath = object.name;
     const contentType = object.contentType;
     // ファイルパスとコンテンツタイプのチェック
@@ -72,7 +73,8 @@ exports.convertHeicToJpeg = functions
         console.log('Already converted file');
         return null;
     }
-    const bucket = admin.storage().bucket();
+    const bucketName = 'mms-student-meeting.firebasestorage.app';
+    const bucket = admin.storage().bucket(bucketName);
     const fileName = path.basename(filePath);
     const fileDir = path.dirname(filePath);
     const nameWithoutExt = path.basename(fileName, path.extname(fileName));
@@ -116,6 +118,7 @@ exports.convertHeicToJpeg = functions
         });
         // 5. Firestoreにも変換済みファイル情報を記録（リトライ付き）
         const db = admin.firestore();
+        const bucketName = 'mms-student-meeting.firebasestorage.app';
         console.log('Searching Firestore for fileName:', fileName);
         // リトライロジック（最大3回、2秒間隔）
         let originalFileDoc = null;
@@ -137,12 +140,26 @@ exports.convertHeicToJpeg = functions
         if (originalFileDoc && !originalFileDoc.empty) {
             const doc = originalFileDoc.docs[0];
             console.log('Updating Firestore document:', doc.id);
+            // 変換済みファイルのメタデータを取得してURLを構築
+            // Firebase StorageのダウンロードトークンベースのURLを生成
+            const convertedFile = bucket.file(jpegFilePath);
+            const [metadata] = await convertedFile.getMetadata();
+            const token = ((_a = metadata.metadata) === null || _a === void 0 ? void 0 : _a.firebaseStorageDownloadTokens) ||
+                require('crypto').randomUUID();
+            // トークンがない場合は設定
+            if (!((_b = metadata.metadata) === null || _b === void 0 ? void 0 : _b.firebaseStorageDownloadTokens)) {
+                await convertedFile.setMetadata({
+                    metadata: {
+                        firebaseStorageDownloadTokens: token
+                    }
+                });
+            }
+            // Firebase Storage形式のダウンロードURLを生成
+            const convertedFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(jpegFilePath)}?alt=media&token=${token}`;
+            console.log('Generated Firebase download URL for converted file');
             await doc.ref.update({
                 convertedFileName: `${nameWithoutExt}_converted.jpg`,
-                convertedFileUrl: await bucket.file(jpegFilePath).getSignedUrl({
-                    action: 'read',
-                    expires: '03-01-2500'
-                }).then(urls => urls[0]),
+                convertedFileUrl,
                 convertedAt: admin.firestore.FieldValue.serverTimestamp()
             });
             console.log('Firestore update successful');
