@@ -316,6 +316,7 @@ export function useFilesData() {
     loading: loading.files,
     error: errors.files,
     uploadFile: actions.uploadFile,
-    deleteFile: actions.deleteFile
+    deleteFile: actions.deleteFile,
+    updateFile: actions.updateFile
   };
 }

@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { X, Save } from 'lucide-react';
-import { useData } from '@/contexts/DataContext';
+import { useFilesData } from '@/contexts/DataContext';
 import type { FileRecord } from '@/contexts/types';
 
 interface FileMemoEditProps {
@@ -18,8 +18,7 @@ export function FileMemoEdit({ file, onClose, onSuccess }: FileMemoEditProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { actions } = useData();
-  const { updateFile } = actions;
+  const { updateFile } = useFilesData();
 
   // 文字数制限
   const maxLength = 200;
