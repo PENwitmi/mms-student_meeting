@@ -68,7 +68,12 @@ export function FileList({ studentId, studentName }: FileListProps) {
   };
 
   const handleFileClick = (file: FileRecord) => {
-    window.open(file.fileUrl, '_blank');
+    // HEICファイルで変換済みJPEGがある場合はそちらを開く
+    if (file.fileName.match(/\.(heic|heif)$/i) && file.convertedFileUrl) {
+      window.open(file.convertedFileUrl, '_blank');
+    } else {
+      window.open(file.fileUrl, '_blank');
+    }
   };
 
   if (loading) {
@@ -145,6 +150,16 @@ export function FileList({ studentId, studentName }: FileListProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {file.fileName}
+                        {file.fileName.match(/\.(heic|heif)$/i) && file.convertedFileUrl && (
+                          <span className="ml-2 text-xs text-green-600" title="JPEG変換済み">
+                            ✅ 変換済
+                          </span>
+                        )}
+                        {file.fileName.match(/\.(heic|heif)$/i) && !file.convertedFileUrl && (
+                          <span className="ml-2 text-xs text-yellow-600" title="変換処理中">
+                            ⏳ 変換中
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-gray-500">
                         {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}

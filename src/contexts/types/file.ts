@@ -21,6 +21,11 @@ export interface FileRecord {
   // Content
   description?: string;  // ファイル説明メモ（最大200文字）
   
+  // HEIC Conversion
+  convertedFileName?: string;  // 変換済みファイル名（HEIC→JPEG）
+  convertedFileUrl?: string;   // 変換済みファイルURL
+  convertedAt?: Date | Timestamp; // 変換日時
+  
   // Metadata
   uploadedBy: string;
   uploadedByName?: string;
