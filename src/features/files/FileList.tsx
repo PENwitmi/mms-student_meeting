@@ -67,19 +67,7 @@ export function FileList({ studentId, studentName }: FileListProps) {
     });
   };
 
-  // HEICファイルの場合は警告表示
   const handleFileClick = (file: FileRecord) => {
-    if (file.fileName.match(/\.(heic|heif)$/i)) {
-      alert(
-        'このファイルはiPhoneの画像形式（HEIC）です。\n' +
-        'Safari以外のブラウザでは表示できない場合があります。\n\n' +
-        '【対処法】\n' +
-        'Safariブラウザでアクセスするか、\n' +
-        'iPhone設定でJPEG形式に変更してください。'
-      );
-      return;
-    }
-    // 通常のファイルは新しいタブで開く
     window.open(file.fileUrl, '_blank');
   };
 
@@ -157,11 +145,6 @@ export function FileList({ studentId, studentName }: FileListProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {file.fileName}
-                        {file.fileName.match(/\.(heic|heif)$/i) && (
-                          <span className="ml-2 text-xs text-yellow-600" title="Safari以外では表示できない可能性があります">
-                            ⚠️ HEIC
-                          </span>
-                        )}
                       </p>
                       <p className="text-xs text-gray-500">
                         {formatFileSize(file.fileSize)} • {formatDate(file.createdAt)}
